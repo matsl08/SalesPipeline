@@ -27,4 +27,4 @@ const InteractionSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Interaction', InteractionSchema);
+export default mongoose.model('Interaction', InteractionSchema);

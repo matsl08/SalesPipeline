@@ -1,6 +1,7 @@
-
 import mongoose from "mongoose";
 const LeadSchema = new mongoose.Schema({
+  leadId: {
+    type: Number, unique: true, default: () => 'LEAD-' + Math.random().toString(36).substr(2, 9).toUpperCase() },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: String,
@@ -9,8 +10,8 @@ const LeadSchema = new mongoose.Schema({
   source: String,
   status: {
     type: String,
-    enum: ['cold', 'warm', 'hot', 'cooked', 'rejected'],
-    default: 'warm',
+    enum: ['cold', 'warm', 'hot', 'cooked'],
+    default: 'cold',
     index: true
   },
   category: {
@@ -27,7 +28,8 @@ const LeadSchema = new mongoose.Schema({
   }],
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    index: true
   },
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now }
@@ -36,14 +38,22 @@ const LeadSchema = new mongoose.Schema({
 LeadSchema.pre('save', function(next) {
   // Auto-set probability based on status
   const statusProbabilities = {
-    cold: 10,
-    warm: 40,
+    cold: 25,
+    warm: 50,
     hot: 75,
-    cooked: 100,
-    rejected: 0
+    cooked: 100
   };
   this.probability = statusProbabilities[this.status] || 40;
   next();
 });
 
-module.exports = mongoose.model('Lead', LeadSchema);
+// Add auto-incrementing leadId
+LeadSchema.pre('save', async function(next) {
+  if (!this.leadId) {
+      const lastLead = await this.constructor.findOne({}, {}, { sort: { 'leadId': -1 } });
+      this.leadId = lastLead ? lastLead.leadId + 1 : 1000; // Start from 1000
+  }
+  next();
+});
+
+export default mongoose.model('Lead', LeadSchema);

@@ -1,64 +1,196 @@
-import User  from '../models/User.js';
+import User from '../models/User.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { validationResult } from 'express-validator';
+import mongoose from 'mongoose';
+import '../db/db.js'; // Import your database connection file
 
- const registerUser = async () => {
-  
+// Middleware to check if the user is added to the database after signing up
+export const checkUserInDatabase = async (req, res, next) => {
     try {
-            const hashPassword = await bcrypt.hash("admin123", 10);
-            const newUser = new User ({
-                name: "Admin",
-                email: "admin@gmail.com",
-                password: hashPassword,
-                role: "admin"
-            })
-            await newUser.save()
-        } catch (error) {
-            console.error('Error creating user:', error);
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (user) {
+            console.log(`User ${user.email} found in database`);
+            return next(); // Proceed if user is found
+        } else {
+            return res.status(404).json({ message: 'User not found in the database after registration' });
         }
-}
-// export const fetchUsers = async (req, res) => {
-//     try {
-//         const userData = await users.find();
-//         res.status(200).send(userData);
-//     } catch (error) {
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error checking user in database', error: 'Internal Server Error' });
+    }
+};
 
-// export const createUsers = async (req, res) => {
-//     try {
-//         const createUser = req.body;
-//         const addedUser = await new users(createUser).save(); // Corrected model usage
-//         res.status(201).send(addedUser); // Changed status to 201 (Created)
-//     } catch (error) {
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+// Register a new user
+export const registerUser = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
-// export const update = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const updatedUser = await users.findByIdAndUpdate(id, req.body, { new: true });
-//         if (!updatedUser) {
-//             return res.status(404).send('User not found');
-//         }
-//         res.status(200).send(updatedUser); // Changed status to 200 (OK)
-//     } catch (error) {
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+    const { username, email, password, profileImage } = req.body;
 
-// export const deleteUser = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const deletedUser = await users.findByIdAndDelete(id);
-//         if (!deletedUser) {
-//             return res.status(404).send('User not found');
-//         }
-//         res.status(200).send('User deleted successfully');
-//     } catch (error) {
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+    try {
+        console.log('Checking if user exists...');
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
 
-registerUser();
+        console.log('Hashing password...');
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        console.log('Saving user to database...');
+        const newUser = new User({
+            name: username,
+            email,
+            password: hashPassword,
+            profileImage: profileImage || null,
+        });
+
+        await newUser.save();
+        console.log('User registered successfully:', newUser);
+
+        res.status(201).json(newUser);
+    } catch (error) {
+        console.error('Error during user registration:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: 'An error occurred during registration' });
+    }
+};
+
+
+// Log in user
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        message: 'Email and password are required'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Send response without password
+    res.status(200).json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      message: 'Error during login',
+      error: error.message
+    });
+  }
+};
+
+// Fetch all users
+export const fetchUsers = async (req, res) => {
+    try {
+        const userData = await User.find();
+        res.status(200).json(userData);
+    } catch (error) {
+        console.error(error); // Log error for debugging
+        res.status(500).json({ message: 'Internal Server Error', error: 'An error occurred while fetching users' });
+    }
+};
+
+// Update a user
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { username, email, password } = req.body;
+
+        // Validate if id is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid user ID format' });
+        }
+
+        // Find user first using ObjectId
+        const user = await User.findOne({ _id: mongoose.Types.ObjectId(id) });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prepare update object
+        const updateData = {};
+        if (username) updateData.name = username;
+        if (email) {
+            // Check if new email already exists for another user
+            const existingUser = await User.findOne({ email, _id: { $ne: id } });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Email already in use' });
+            }
+            updateData.email = email;
+        }
+        
+        // If password is being updated, hash it
+        if (password) {
+            const hashPassword = await bcrypt.hash(password, 10);
+            updateData.password = hashPassword;
+        }
+
+        // Update user with validation and return new document
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: mongoose.Types.ObjectId(id) },
+            updateData,
+            { 
+                new: true, 
+                runValidators: true 
+            }
+        );
+
+        console.log('User updated successfully:', updatedUser);
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ 
+            message: 'Internal Server Error', 
+            error: 'An error occurred while updating the user' 
+        });
+    }
+};
+
+// Delete a user
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await User.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error); // Log error for debugging
+        res.status(500).json({ message: 'Internal Server Error', error: 'An error occurred while deleting the user' });
+    }
+};
