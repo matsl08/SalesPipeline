@@ -1,29 +1,15 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import LeadManagement from './LeadManagement';
 import InteractionHistory from './InteractionHistory';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ReportingTools from './ReportingTools';
-import Login from './Login';
-import SignUp from './SignUp';
-import './Dashboard.css'; // Custom CSS styles
+import './Dashboard.css';
 
-function App() {
+const Dashboard = () => {
+  const [currentLead, setCurrentLead] = useState(null);
   const [username, setUsername] = useState(localStorage.getItem('user'));
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (username) {
-      // You are logged in
-    }
-  }, [username]);
-
-  const handleLogin = (username) => {
-    setUsername(username);
-    localStorage.setItem('user', username);
-    navigate('/');
-  };
 
   const handleLogout = () => {
     setUsername(null);
@@ -32,62 +18,66 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
         <h1>Enhanced Sales Pipeline System</h1>
-        {username ? (
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
-        ) : (
-          <nav>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Sign Up</Link>
-          </nav>
-        )}
+        <div className="header-controls">
+          {username ? (
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          ) : (
+            <nav className="auth-nav">
+              <Link to = "/dashboard" className="nav-link">Dashboard</Link>         
+              <Link to="/pipeline" className="nav-link">Pipeline</Link>
+              <Link to="/" className="nav-link">Log Out</Link>
+            </nav>
+          )}
+        </div>
       </header>
 
-      {/* Main Content */}
-      <main>
-        <Routes>
-         <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+      <div className="dashboard-content">
+        <div className="dashboard-section">
+          <h2>Analytics Overview</h2>
+          <div className="analytics-container">
+            <div className="analytics-card">
+              <h3>Total Sales</h3>
+              <div className="value">$45,280</div>
+            </div>
+            <div className="analytics-card">
+              <h3>Conversion Rate</h3>
+              <div className="value">24.8%</div>
+            </div>
+            <div className="analytics-card">
+              <h3>Active Leads</h3>
+              <div className="value">128</div>
+            </div>
+          </div>
+        </div>
 
-          {username && (
-            <Route
-              path="/"
-              element={
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="dashboard-section">
-                    <h2>Lead Management</h2>
-                    <LeadManagement />
-                  </div>
+        <div className="dashboard-section">
+          <h2>Sales Analytics</h2>
+          <AnalyticsDashboard />
+        </div>
 
-                  <div className="dashboard-section">
-                    <h2>Interaction History</h2>
-                    <InteractionHistory leadName="John Doe" />
-                  </div>
-
-                  <div className="dashboard-section">
-                    <h2>Analytics Dashboard</h2>
-                    <AnalyticsDashboard />
-                  </div>
-
-                  <div className="dashboard-section">
-                    <h2>Reporting Tools</h2>
-                    <ReportingTools />
-                  </div>
-                </div>
-              }
-            />
-          )}
-
-          <Route path="*" element={<Login onLogin={handleLogin} />} />
-        </Routes>
-      </main>
+        <div className="dashboard-section">
+          <h2>Reporting Tools</h2>
+          <div className="analytics-container">
+            <div className="analytics-card">
+              <h3>Monthly Report</h3>
+              <p>Generate comprehensive monthly sales reports.</p>
+              <button className="action-btn">Generate</button>
+            </div>
+            <div className="analytics-card">
+              <h3>Performance Analysis</h3>
+              <p>Analyze sales representative performance metrics.</p>
+              <button className="action-btn">View Analysis</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-export default App;
+export default Dashboard;

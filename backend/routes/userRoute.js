@@ -1,12 +1,13 @@
 import { checkUserInDatabase, 
     registerUser, 
-    fetchUsers, 
+    fetchUsers,
     updateUser, 
     deleteUser }
     from "../controllers/userController.js";
 import express from "express";
 import { check } from "express-validator";
-import { loginUser } from "../controllers/userController.js";
+// import { loginUser } from "../controllers/userController.js";
+import { loginUser } from "../controllers/authController.js";
 
 const router = express.Router();
 

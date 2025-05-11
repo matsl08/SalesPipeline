@@ -8,10 +8,12 @@ import interactionRoutes from './routes/interactionRoutes.js';
 import userRoute from './routes/userRoute.js';
 import leadRoute from './routes/leadRoutes.js';
 import analyticsRoute from './routes/analyticsRoute.js';
+import authRoute from './routes/authRoute.js';
 
 
 dotenv.config();
 
+connectDatabase();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,16 +24,17 @@ const PORT = process.env.PORT || 3000;
 // app.use(bodyParser.json());
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true
+  credentials: true,
+   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
-connectDatabase();
 // Add this before your routes
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log( `${req.method} ${req.url}`);
     next();
 });
 //routes
@@ -39,6 +42,7 @@ app.use('/api/interactions', interactionRoutes);
 app.use('/api/users', userRoute);
 app.use('/api/leads', leadRoute);
 app.use('/api/analytics', analyticsRoute);
+app.use('/api/auth', authRoute);
 
 
 

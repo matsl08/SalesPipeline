@@ -58,57 +58,66 @@ export const registerUser = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', error: 'An error occurred during registration' });
     }
 };
+// Add this helper function before the loginUser function
+const generateToken = (user) => {
+  return jwt.sign(
+    { 
+      id: user._id,
+      email: user.email 
+    },
+    process.env.JWT_SECRET || 'your-secret-key',
+    { expiresIn: '24h' }
+  );
+};
 
-
-// Log in user
+// Update the loginUser function
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
+    // Validation
     if (!email || !password) {
       return res.status(400).json({
         message: 'Email and password are required'
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find user and include password field
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     if (!user) {
       return res.status(401).json({
         message: 'Invalid email or password'
       });
     }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
+    // Compare password using bcrypt
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
       return res.status(401).json({
         message: 'Invalid email or password'
       });
     }
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    // Generate token and send response
+    const token = generateToken(user);
+    
+    // Remove password from user object
+    const userResponse = {
+      id: user._id,
+      email: user.email,
+      name: user.name
+    };
 
-    // Send response without password
     res.status(200).json({
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email
-      }
+      user: userResponse
     });
+
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
-      message: 'Error during login',
-      error: error.message
+      message: 'An error occurred during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

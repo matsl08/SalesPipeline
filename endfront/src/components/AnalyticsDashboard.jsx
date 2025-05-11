@@ -1,15 +1,13 @@
-// src/components/AnalyticsDashboard.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const data = [
+const AnalyticsDashboard = () => {
+  const data = [
   { name: 'Cold', leads: 10 },
   { name: 'Warm', leads: 20 },
   { name: 'Hot', leads: 15 },
-  { name: 'Cooked', leads: 5 },
+  { name: 'Cooked', prospects: 5 },
 ];
-
-const AnalyticsDashboard = () => {
   return (
     <div className="p-4 bg-white rounded shadow-md">
       <h3 className="text-xl font-semibold mb-4">Sales Analytics</h3>
@@ -21,6 +19,7 @@ const AnalyticsDashboard = () => {
           <Tooltip />
           <Legend />
           <Bar dataKey="leads" fill="#8884d8" />
+           <Bar dataKey="prospects" fill="#8d1021" />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['admin', 'employee'],
-    required: true
+    required: false
   },
   profileImage: {type:String},
   createdAt: {
@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   }
 });
+
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Error comparing passwords');
+  }
+};
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {

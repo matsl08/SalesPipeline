@@ -28,14 +28,13 @@ const App = () => {
     navigate('/');
   };
 
-  const handleLogout = () => {
-    setUsername(null);
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+
 
   return (
-    <div>
+    <div className="min-h-screen">
+      {/* Header */}
+
+
       {/* Main Content */}
       <main>
         <Routes>
@@ -43,6 +42,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp onSignUp={handleLogin} />} />
           <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/pipeline" element={<LeadManagement />} />
 
 
           {username && (

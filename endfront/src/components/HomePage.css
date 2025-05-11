@@ -6,14 +6,15 @@
 }
 
 .nav-bar {
-    display: flex;
+    display: left;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #ffffff;
+    background-color: #1d1c1c;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: fixed;
-    width: 95%;
+    width: 100%;
+    color:aqua;
     top: 0;
     z-index: 1000;
 }
@@ -32,7 +33,7 @@
 .logo-text {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #2563eb;
+    color: aqua;
 }
 
 .nav-links {
@@ -42,13 +43,14 @@
 
 .nav-link {
     text-decoration: none;
-    color: #4b5563;
+    color: aqua;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
 .nav-link:hover {
     color: #2563eb;
+    transition: forwards 0.5s ease-in-out;
 }
 
 .hero-section {
