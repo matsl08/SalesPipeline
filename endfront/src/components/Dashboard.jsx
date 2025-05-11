@@ -7,7 +7,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import ReportingTools from './ReportingTools';
 import Login from './Login';
 import SignUp from './SignUp';
-import './styles/App.css'; // Custom CSS styles
+import './Dashboard.css'; // Custom CSS styles
 
 function App() {
   const [username, setUsername] = useState(localStorage.getItem('user'));

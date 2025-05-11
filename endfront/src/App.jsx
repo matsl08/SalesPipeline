@@ -7,15 +7,18 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import ReportingTools from './components/ReportingTools';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
-import './styles/App.css'; // Custom CSS styles
+import './App.css'; // Custom CSS styles
+import Dashboard from './components/Dashboard';
+import HomePage from './components/HomePage';
 
-function App() {
+const App = () => {
   const [username, setUsername] = useState(localStorage.getItem('user'));
   const navigate = useNavigate();
 
   useEffect(() => {
     if (username) {
       // You are logged in
+       navigate('/');
     }
   }, [username]);
 
@@ -32,27 +35,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header>
-        <h1>Enhanced Sales Pipeline System</h1>
-        {username ? (
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
-        ) : (
-          <nav>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Sign Up</Link>
-          </nav>
-        )}
-      </header>
-
+    <div>
       {/* Main Content */}
       <main>
         <Routes>
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/" element={<HomePage />} /> 
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp onSignUp={handleLogin} />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
 
           {username && (
             <Route
