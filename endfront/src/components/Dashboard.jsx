@@ -1,3 +1,4 @@
+// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import LeadManagement from './LeadManagement';
@@ -16,6 +17,10 @@ const Dashboard = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+  const handleViewAnalytics = () => {
+    navigate('/analytics');
+  }
 
   return (
     <div className="dashboard-container">
@@ -71,7 +76,7 @@ const Dashboard = () => {
             <div className="analytics-card">
               <h3>Performance Analysis</h3>
               <p>Analyze sales representative performance metrics.</p>
-              <button className="action-btn">View Analysis</button>
+              <button className="action-btn" onClick={handleViewAnalytics}>View Analysis</button>
             </div>
           </div>
         </div>

@@ -1,0 +1,14 @@
+.view-analytics-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.view-analytics-container h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.analytics-details {
+  font-size: 1.2rem;
+  color: #555;
+}

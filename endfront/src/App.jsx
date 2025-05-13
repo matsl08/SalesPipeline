@@ -9,6 +9,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp';
 import './App.css'; // Custom CSS styles
 import Dashboard from './components/Dashboard';
+import ViewAnalytics from './components/ViewAnalytics';
 import HomePage from './components/HomePage';
 
 const App = () => {
@@ -75,6 +76,7 @@ const App = () => {
           )}
 
           <Route path="*" element={<Login onLogin={handleLogin} />} />
+          <Route path="/analytics" element={<ViewAnalytics />} />
         </Routes>
       </main>
     </div>

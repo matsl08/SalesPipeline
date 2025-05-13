@@ -24,26 +24,26 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    try {
-      const response = await axios.post('http://localhost:3000/api/users/login', {
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password
-      });
+    // try {
+    //   const response = await axios.post('http://localhost:3000/api/users/login', {
+    //     email: formData.email.trim().toLowerCase(),
+    //     password: formData.password
+    //   });
 
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      // if (response.data && response.data.token) {
+      //   localStorage.setItem('token', response.data.token);
+      //   localStorage.setItem('user', JSON.stringify(response.data.user));
+      //   axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         navigate('/dashboard');
-      } else {
-        setError('Invalid login response');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
+      // } else {
+      //   setError('Invalid login response');
+      // }
+    // } catch (err) {
+    //   console.error('Login error:', err);
+    //   setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
