@@ -1,86 +1,45 @@
-// src/App.jsx
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import LeadManagement from './components/LeadManagement';
-import InteractionHistory from './components/InteractionHistory';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
-import ReportingTools from './components/ReportingTools';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import HomePage from './components/HomePage';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
-import './App.css'; // Custom CSS styles
 import Dashboard from './components/Dashboard';
+import Pipeline from './components/Pipeline';
+import InteractionHistory from './components/InteractionHistory';
 import ViewAnalytics from './components/ViewAnalytics';
-import HomePage from './components/HomePage';
+import './App.css';
 
 const App = () => {
-  const [username, setUsername] = useState(localStorage.getItem('user'));
-  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    if (username) {
-      // You are logged in
-       navigate('/');
-    }
-  }, [username]);
-
-  const handleLogin = (username) => {
-    setUsername(username);
-    localStorage.setItem('user', username);
-    navigate('/');
-  };
-
-
+  if (loading) {
+    return <div className="loading-screen">Loading application...</div>;
+  }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-
-
-      {/* Main Content */}
-      <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} /> 
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp onSignUp={handleLogin} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/pipeline" element={<LeadManagement />} />
-
-
-          {username && (
-            <Route
-              path="/"
-              element={
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="dashboard-section">
-                    <h2>Lead Management</h2>
-                    <LeadManagement />
-                  </div>
-
-                  <div className="dashboard-section">
-                    <h2>Interaction History</h2>
-                    <InteractionHistory leadName="John Doe" />
-                  </div>
-
-                  <div className="dashboard-section">
-                    <h2>Analytics Dashboard</h2>
-                    <AnalyticsDashboard />
-                  </div>
-
-                  <div className="dashboard-section">
-                    <h2>Reporting Tools</h2>
-                    <ReportingTools />
-                  </div>
-                </div>
-              }
-            />
-          )}
-
-          <Route path="*" element={<Login onLogin={handleLogin} />} />
-          <Route path="/analytics" element={<ViewAnalytics />} />
-        </Routes>
-      </main>
+    <div className="app-container">
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Login />
+        } />
+        <Route path="/signup" element={
+          isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />
+        } />
+        
+        {/* Routes that were previously protected */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/pipeline" element={<Pipeline />} />
+        <Route path="/interactions" element={<InteractionHistory />} />
+        <Route path="/analytics" element={<ViewAnalytics />} />
+        
+        {/* Catch-all route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </div>
   );
-}
+};
 
 export default App;

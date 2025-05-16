@@ -22,10 +22,11 @@ const PORT = process.env.PORT || 3000;
 // const MONGODB_URL = process.env.MONGODB_URI || 'mongodb://localhost:27017/salesPipeline';
 
 // app.use(bodyParser.json());
+// Update the CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Your frontend URLs
   credentials: true,
-   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());

@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 } */
+
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #4a5568;
+  background-color: #f7fafc;
+}
+
+.app-container {
+  min-height: 100vh;
+}

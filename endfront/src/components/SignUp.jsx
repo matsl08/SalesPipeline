@@ -97,7 +97,7 @@ const SignUp = () => {
               minLength={6}
             />
           </div>
-
+          <p className="hasAccount">Already have an account? <Link to="/login">Login</Link></p>
           <button
             type="submit"
             disabled={loading}

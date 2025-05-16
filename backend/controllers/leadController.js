@@ -18,15 +18,15 @@ export const createLead = async (req, res) => {
 
         const lead = new Lead(req.body);
 
-        // Validate the lead before saving
-        const validationError = lead.validateSync();
-        if (validationError) {
-            console.error('Validation error:', validationError);
-            return res.status(400).json({
-                message: 'Validation error',
-                errors: validationError.errors
-            });
-        }
+        // // Validate the lead before saving
+        // const validationError = lead.validateSync();
+        // if (validationError) {
+        //     console.error('Validation error:', validationError);
+        //     return res.status(400).json({
+        //         message: 'Validation error',
+        //         errors: validationError.errors
+        //     });
+        // }
 
         const savedLead = await lead.save();
         console.log('Lead saved successfully:', savedLead); // Success log

@@ -1,22 +1,57 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #3a86ff;
+    --primary-dark: #2667cc;
+    --secondary-color: #4cc9f0;
+    --accent-color: #f72585;
+    --dark-bg: #1a1a2e;
+    --light-bg: #f8f9fa;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+    --card-bg: #ffffff;
+    --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    --transition-speed: 0.3s;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
 
 .home-container {
     min-height: 100vh;
-    background-color: #080808;
+    background-color: var(--light-bg);
+    overflow-x: hidden;
 }
 
+/* Navigation Bar */
 .nav-bar {
-    display: left;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #1d1c1c;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     position: fixed;
     width: 100%;
-    color:aqua;
     top: 0;
     z-index: 1000;
+    transition: all var(--transition-speed) ease;
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.nav-bar.scrolled {
+    padding: 0.7rem 2rem;
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .logo-container {
@@ -28,103 +63,284 @@
 .logo {
     width: 40px;
     height: 40px;
+    transition: transform var(--transition-speed) ease;
+}
+
+.logo:hover {
+    transform: rotate(10deg);
 }
 
 .logo-text {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: aqua;
+    font-weight: 700;
+    color: var(--primary-color);
+    transition: color var(--transition-speed) ease;
 }
 
 .nav-links {
     display: flex;
-    gap: 2rem;
+    gap: 2.5rem;
 }
 
 .nav-link {
+    position: relative;
     text-decoration: none;
-    color: aqua;
+    color: var(--primary-dark);
     font-weight: 500;
-    transition: color 0.3s ease;
+    padding: 0.5rem 0;
+    transition: color var(--transition-speed) ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--text-dark);
+    transition: width var(--transition-speed) ease;
 }
 
 .nav-link:hover {
-    color: #2563eb;
-    transition: forwards 0.5s ease-in-out;
+    color: var(--primary-color);
 }
 
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Hero Section */
 .hero-section {
-    padding: 8rem 2rem 4rem;
+    padding: 10rem 2rem 6rem;
     text-align: center;
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--text-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,192L48,176C96,160,192,128,288,122.7C384,117,480,139,576,165.3C672,192,768,224,864,213.3C960,203,1056,149,1152,117.3C1248,85,1344,75,1392,69.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.6;
 }
 
 .hero-title {
-    font-size: 3rem;
-    font-weight: bold;
+    font-size: 3.5rem;
+    font-weight: 700;
     margin-bottom: 1.5rem;
+    animation: fadeInUp 0.8s ease-out;
+    position: relative;
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     opacity: 0.9;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeInUp 1s ease-out;
+    position: relative;
 }
 
 .cta-button {
     display: inline-block;
-    padding: 1rem 2rem;
-    background-color: #ffffff;
-    color: #2563eb;
+    padding: 1rem 2.5rem;
+    background-color: var(--accent-color);
+    color: var(--text-light);
     text-decoration: none;
-    border-radius: 0.5rem;
-    font-weight: bold;
-    transition: transform 0.3s ease;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all var(--transition-speed) ease;
+    box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 1.2s ease-out;
+    z-index: 1;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: width 0.4s ease;
+    z-index: -1;
 }
 
 .cta-button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(247, 37, 133, 0.4);
 }
 
+.cta-button:hover::before {
+    width: 100%;
+}
+
+/* Features Section */
 .features-section {
-    padding: 4rem 2rem;
+    padding: 6rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 3rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem;
     margin-top: 3rem;
 }
 
 .feature-card {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: all var(--transition-speed) ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(to bottom, rgba(58, 134, 255, 0.05), transparent);
+    transition: height 0.4s ease;
+    z-index: -1;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover::before {
+    height: 100%;
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
 }
 
 .feature-title {
-    font-size: 1.25rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 600;
     margin-bottom: 1rem;
-    color: #1f2937;
+    color: var(--text-dark);
 }
 
 .feature-description {
-    color: #6b7280;
-    line-height: 1.6;
+    color: #666;
+    line-height: 1.7;
 }
 
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+    .nav-bar {
+        padding: 1rem;
+    }
+
     .nav-links {
         display: none;
     }
-    
+
     .hero-title {
-        font-size: 2rem;
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        padding: 2rem;
     }
 }
+
+/* Add this JavaScript to your component for scroll effect:
+window.addEventListener('scroll', function() {
+    const navbar = document.querySelector('.nav-bar');
+    if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+    } else {
+        navbar.classList.remove('scrolled');
+    }
+});
+*/

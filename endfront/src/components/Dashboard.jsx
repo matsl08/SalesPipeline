@@ -1,8 +1,8 @@
 // Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
-import LeadManagement from './LeadManagement';
-import InteractionHistory from './InteractionHistory';
+// import Pipeline from './Pipeline';
+// import InteractionHistory from './InteractionHistory';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ReportingTools from './ReportingTools';
 import './Dashboard.css';
@@ -17,6 +17,33 @@ const Dashboard = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+   const [analytics, setAnalytics] = useState({
+    totalSales: 0,
+    conversionRate: 0,
+    activeLeads: 0
+  });
+const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/analytics/dashboard');
+        const data = await response.json();
+        setAnalytics({
+          totalSales: data.totalSales || 0,
+          conversionRate: data.conversionRate || 0,
+          activeLeads: data.activeLeads || 0
+        });
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
 
   const handleViewAnalytics = () => {
     navigate('/analytics');
@@ -35,6 +62,7 @@ const Dashboard = () => {
             <nav className="auth-nav">
               <Link to = "/dashboard" className="nav-link">Dashboard</Link>         
               <Link to="/pipeline" className="nav-link">Pipeline</Link>
+              <Link to="/interactions" className="nav-link">Interactions</Link>
               <Link to="/" className="nav-link">Log Out</Link>
             </nav>
           )}
@@ -45,18 +73,25 @@ const Dashboard = () => {
         <div className="dashboard-section">
           <h2>Analytics Overview</h2>
           <div className="analytics-container">
-            <div className="analytics-card">
-              <h3>Total Sales</h3>
-              <div className="value">$45,280</div>
-            </div>
-            <div className="analytics-card">
-              <h3>Conversion Rate</h3>
-              <div className="value">24.8%</div>
-            </div>
-            <div className="analytics-card">
-              <h3>Active Leads</h3>
-              <div className="value">128</div>
-            </div>
+              {isLoading ? (
+              <div className="loading">Loading analytics...</div>
+                  ) : (
+              <>
+                <div className="analytics-card">
+                    <h3>Total Sales</h3>
+                    <div className="value">1000</div>
+                </div>
+                <div className="analytics-card">
+                    <h3>Conversion Rate</h3>
+                <div className="value">20%</div>
+                </div>
+                <div className="analytics-card">
+                    <h3>Active Leads</h3>
+                <div className="value">200</div>
+                </div>
+              </>
+
+          )}
           </div>
         </div>
 
@@ -82,7 +117,9 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
-  );
+  );{analytics.conversionRate.toFixed(1)}
 };
 
+// {analytics.activeLeads}
 export default Dashboard;
+// ${analytics.totalSales.toLocaleString()}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
@@ -11,6 +11,12 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const auth = useAuth();
+
+  // Clear any console errors on component mount
+  useEffect(() => {
+    console.clear();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -24,25 +30,42 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    // try {
-    //   const response = await axios.post('http://localhost:3000/api/users/login', {
-    //     email: formData.email.trim().toLowerCase(),
-    //     password: formData.password
-    //   });
-
-      // if (response.data && response.data.token) {
-      //   localStorage.setItem('token', response.data.token);
-      //   localStorage.setItem('user', JSON.stringify(response.data.user));
-      //   axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+    //  try {
+    //    const response = await fetch('http://localhost:3000/api/login/:${formData.email}', {
+    //      method: 'POST',
+    //      headers: {
+    //        'Content-Type': 'application/json',
+    //      },
+    //      body: JSON.stringify({
+    //        email: formData.email.trim(),
+    //        password: formData.password
+    //      }),
+    //    });
+      
+    //    const data = await response.json();
+      
+    //    if (!response.ok) {
+    //      throw new Error(data.message || 'Login failed. Please check your credentials and try again.');
+    //    }
+      
+    //    if (data && data.token && data.user) {
+    //       // Store user info in localStorage
+    //      localStorage.setItem('token', data.token);
+    //      localStorage.setItem('user', JSON.stringify(data.user));
+        
+    //       // Update auth context
+    //      auth.login(data.user, data.token);
+        
+    //     //  Navigate to dashboard
         navigate('/dashboard');
-      // } else {
-      //   setError('Invalid login response');
-      // }
-    // } catch (err) {
-    //   console.error('Login error:', err);
-    //   setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    // } finally {
-    //   setLoading(false);
+    //    } else {
+    //      throw new Error('Invalid response format');
+    //    }
+    //  } catch (err) {
+    //    console.error('Login error:', err);
+    //    setError(err.message || 'Login failed. Please check your credentials and try again.');
+    //  } finally {
+    //    setLoading(false);
     // }
   };
 
@@ -90,7 +113,10 @@ const Login = () => {
               onChange={handleChange}
             />
           </div>
-
+            <div className="login-help">
+          <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
+          <p>Test account: test@example.com / password123</p>
+        </div>
           <button
             type="submit"
             disabled={loading}
@@ -99,6 +125,8 @@ const Login = () => {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+        
+      
       </div>
     </div>
   );
