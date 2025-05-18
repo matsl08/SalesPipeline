@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 export const auth = async (req, res, next) => {
@@ -11,12 +12,11 @@ export const auth = async (req, res, next) => {
             });
         }
 
-        // Decode the simple token
-        const decoded = Buffer.from(token, 'base64').toString('utf-8');
-        const userId = decoded.split('-')[0];
+        // Verify the JWT token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
         
         // Find user by id
-        const user = await User.findById(userId)
+        const user = await User.findById(decoded.id)
             .select('-password'); // Exclude password
         
         if (!user) {

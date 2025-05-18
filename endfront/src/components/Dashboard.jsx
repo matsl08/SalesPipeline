@@ -1,28 +1,23 @@
-// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
-// import Pipeline from './Pipeline';
-// import InteractionHistory from './InteractionHistory';
+import { useAuth } from '../context/AuthContext';
 import AnalyticsDashboard from './AnalyticsDashboard';
-import ReportingTools from './ReportingTools';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const [currentLead, setCurrentLead] = useState(null);
-  const [username, setUsername] = useState(localStorage.getItem('user'));
+  const [username, setUsername] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser)  : null;
+  });
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    setUsername(null);
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
-   const [analytics, setAnalytics] = useState({
+  const { logout: authLogout } = useAuth();
+  const [analytics, setAnalytics] = useState({
     totalSales: 0,
     conversionRate: 0,
     activeLeads: 0
   });
-const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -50,25 +45,34 @@ const [isLoading, setIsLoading] = useState(true);
 
   const handleViewAnalytics = () => {
     navigate('/analytics');
-  }
+  };
+  const handleLogout = () => {
+    // Use the logout function from AuthContext to properly clear all auth data
+    authLogout();
+    setUsername(null);
+    navigate('/login');
+  };
+
 
   return (
+
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>Enhanced Sales Pipeline System</h1>
         <div className="header-controls">
           {username ? (
-            <button onClick={handleLogout} className="logout-btn">
-              Logout
-            </button>
+            <div className="user-controls">
+              <span className="welcome-message">Welcome, {username.name}</span>
+            </div>
           ) : (
-            <nav className="auth-nav">
-              <Link to = "/dashboard" className="nav-link">Dashboard</Link>         
-              <Link to="/pipeline" className="nav-link">Pipeline</Link>
-              <Link to="/interactions" className="nav-link">Interactions</Link>
-              <Link to="/" className="nav-link">Log Out</Link>
-            </nav>
+            <Navigate to="/login" />
           )}
+          <nav className="auth-nav">
+            <Link to="/dashboard"><button className="nav-link active">Dashboard</button></Link>
+            <Link to="/pipeline"><button className="nav-link">Pipeline</button></Link>
+            <Link to="/interactions"><button className="nav-link">Interactions</button></Link>
+            <button className="nav-link" onClick={handleLogout}>Log Out</button>
+          </nav>
         </div>
       </header>
 
@@ -76,25 +80,24 @@ const [isLoading, setIsLoading] = useState(true);
         <div className="dashboard-section">
           <h2>Analytics Overview</h2>
           <div className="analytics-container">
-              {isLoading ? (
+            {isLoading ? (
               <div className="loading">Loading analytics...</div>
-                  ) : (
+            ) : (
               <>
                 <div className="analytics-card">
-                    <h3>Total Sales</h3>
-                    <div className="value">1000</div>
+                  <h3>Total Sales</h3>
+                  <div className="value">{analytics.totalSales.toLocaleString()}</div>
                 </div>
                 <div className="analytics-card">
-                    <h3>Conversion Rate</h3>
-                <div className="value">20%</div>
+                  <h3>Conversion Rate</h3>
+                  <div className="value">{analytics.conversionRate.toFixed(1)}%</div>
                 </div>
                 <div className="analytics-card">
-                    <h3>Active Leads</h3>
-                <div className="value">200</div>
+                  <h3>Active Leads</h3>
+                  <div className="value">{analytics.activeLeads}</div>
                 </div>
               </>
-
-          )}
+            )}
           </div>
         </div>
 
@@ -120,9 +123,7 @@ const [isLoading, setIsLoading] = useState(true);
         </div>
       </div>
     </div>
-  );{analytics.conversionRate.toFixed(1)}
+  );
 };
 
-// {analytics.activeLeads}
 export default Dashboard;
-// ${analytics.totalSales.toLocaleString()}

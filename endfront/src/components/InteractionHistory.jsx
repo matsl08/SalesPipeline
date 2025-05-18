@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Interactions.css';
 import AddInteractionForm from '../modals/AddInteraction/AddInteraction';
 import EditInteractionForm from '../modals/EditInteraction/EditInteraction';
+import { fetchInteractions, fetchInteractionsByLead, deleteInteraction } from '../services/interactionService';
 
 
 const InteractionHistory = ({ leadName }) => {
@@ -11,13 +13,47 @@ const InteractionHistory = ({ leadName }) => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [currentInteraction, setCurrentInteraction] = useState(null);
   const [currentInteractionIndex, setCurrentInteractionIndex] = useState(-1);
-  const [interactions, setInteractions] = useState([
-    { date: '2025-05-01', type: 'Call', notes: 'Discussed the new product.' },
-    { date: '2025-05-02', type: 'Email', notes: 'Followed up on the proposal.' },
-    { date: '2025-05-03', type: 'Meeting', notes: 'Meeting to finalize the contract.' },
-  ]);
+  const [interactions, setInteractions] = useState([]);
   const [leads, setLeads] = useState([]);
   const navigate = useNavigate();
+  const { logout: authLogout } = useAuth();
+
+  // Fetch interactions data
+  useEffect(() => {
+    const getInteractions = async () => {
+      try {
+        let interactionsData;
+
+        if (leadName) {
+          // If a leadName is provided, find the lead ID and fetch interactions for that lead
+          const lead = leads.find(l => l.name === leadName);
+          if (lead && lead._id) {
+            interactionsData = await fetchInteractionsByLead(lead._id);
+          } else {
+            interactionsData = await fetchInteractions();
+          }
+        } else {
+          // Otherwise fetch all interactions
+          interactionsData = await fetchInteractions();
+        }
+
+        // Format the interactions for display
+        const formattedInteractions = interactionsData.map(interaction => ({
+          _id: interaction._id,
+          date: interaction.date || new Date(interaction.createdAt).toISOString().split('T')[0],
+          type: interaction.type.charAt(0).toUpperCase() + interaction.type.slice(1),
+          notes: interaction.notes || interaction.summary
+        }));
+
+        setInteractions(formattedInteractions);
+      } catch (error) {
+        console.error('Error fetching interactions:', error);
+        setInteractions([]);
+      }
+    };
+
+    getInteractions();
+  }, [leadName, leads]);
 
   // Fetch leads for the interaction form
   useEffect(() => {
@@ -35,43 +71,42 @@ const InteractionHistory = ({ leadName }) => {
           // Check if data is an array or has a leads property
           const leadsArray = Array.isArray(data) ? data : (data.leads || []);
           setLeads(leadsArray);
-        } else {
-          // Use mock data if API is unavailable
-          console.log('Using mock lead data for interactions');
-          setLeads([
-            { _id: 'mock-1', name: 'John Smith', company: 'Acme Inc.' },
-            { _id: 'mock-2', name: 'Sarah Johnson', company: 'Tech Solutions' },
-            { _id: 'mock-3', name: 'Michael Brown', company: 'Global Services' },
-            { _id: 'mock-4', name: 'Emily Davis', company: 'Innovative Systems' }
-          ]);
         }
       } catch (error) {
         console.error('Error fetching leads for interactions:', error);
-        // Use mock data if API call fails
-        setLeads([
-          { _id: 'mock-1', name: 'John Smith', company: 'Acme Inc.' },
-          { _id: 'mock-2', name: 'Sarah Johnson', company: 'Tech Solutions' },
-          { _id: 'mock-3', name: 'Michael Brown', company: 'Global Services' },
-          { _id: 'mock-4', name: 'Emily Davis', company: 'Innovative Systems' }
-        ]);
       }
     };
 
     fetchLeads();
   }, []);
 
-  const handleRemoveInteraction = (index) => {
-    // Remove the interaction from the state
-    setInteractions(prev => {
-      const newInteractions = [...prev];
-      newInteractions.splice(index, 1);
-      return newInteractions;
-    });
+  const handleRemoveInteraction = async (interaction, index) => {
+    try {
+      if (window.confirm('Are you sure you want to remove this interaction?')) {
+        // If we have an ID, use the service to delete from the database
+        if (interaction._id) {
+          await deleteInteraction(interaction._id);
+        }
+
+        // Remove the interaction from the state
+        setInteractions(prev => {
+          const newInteractions = [...prev];
+          newInteractions.splice(index, 1);
+          return newInteractions;
+        });
+
+        // Show success message
+        console.log('Interaction removed successfully');
+      }
+    } catch (error) {
+      console.error('Error removing interaction:', error);
+      alert('Failed to remove interaction. Please try again.');
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Use the logout function from AuthContext to properly clear all auth data
+    authLogout();
     setUsername(null);
     navigate('/login');
   };
@@ -81,18 +116,12 @@ const InteractionHistory = ({ leadName }) => {
       <header className="dashboard-header">
         <h1>Enhanced Sales Pipeline System</h1>
         <div className="header-controls">
-          {username ? (
-            <button onClick={handleLogout} className="logout-btn">
-              Logout
-            </button>
-          ) : (
-            <nav className="auth-nav">
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/pipeline" className="nav-link">Pipeline</Link>
-              <Link to="/interactions" className="nav-link">Interactions</Link>
-              <Link to="/signup" className="nav-link">Log Out</Link>
-            </nav>
-          )}
+          <nav className="auth-nav">
+            <Link to="/dashboard"><button className="nav-link">Dashboard</button></Link>
+            <Link to="/pipeline"><button className="nav-link">Pipeline</button></Link>
+            <Link to="/interactions"><button className="nav-link active">Interactions</button></Link>
+            <button className="nav-link" onClick={handleLogout}>Log Out</button>
+          </nav>
         </div>
       </header>
 
@@ -107,8 +136,12 @@ const InteractionHistory = ({ leadName }) => {
               Add Interaction
             </button>
           </div>
+          {interactions.length === 0 ? (
+            <div className="empty-column">No interactions to show</div>
+          ): (
           <p className="section-subtitle">Here are the recent interactions {leadName ? `with ${leadName}` : ''}:</p>
-        {showInteractionForm &&
+          )}
+          {showInteractionForm &&
           <AddInteractionForm
             onClose={() => setShowInteractionForm(false)}
             setInteractions={setInteractions}
@@ -146,17 +179,14 @@ const InteractionHistory = ({ leadName }) => {
                       </button>
                       <button
                         className="remove-interaction-btn"
-                        onClick={() => {
-                          if (window.confirm('Are you sure you want to remove this interaction?')) {
-                            handleRemoveInteraction(index);
-                          }
-                        }}
+                        onClick={() => handleRemoveInteraction(interaction, index)}
                       >
                         Remove
                       </button>
                     </div>
                   </div>
                 </li>
+
               ))}
             </ul>
           </div>

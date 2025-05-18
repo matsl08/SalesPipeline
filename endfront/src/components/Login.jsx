@@ -43,14 +43,16 @@ const Login = () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Login failed. Please check your credentials and try again.');
+      throw new Error(data.error || 'Login failed. Invalid email or password.');
     }
 
+    // Store token in localStorage
+    localStorage.setItem('token', data.token);
     // Store user info in localStorage
     localStorage.setItem('user', JSON.stringify(data.user));
     // Optionally update auth context if you use it
     if (auth && auth.login) {
-      auth.login(data.user);
+      auth.login(data.user, data.token);
     }
 
     navigate('/dashboard');

@@ -115,6 +115,10 @@ export const updateDeal = async (dealId, dealData) => {
       updatedAt: new Date().toISOString()
     };
 
+    // Always include the ID in the request body for the backend to use
+    // This ensures the backend can find the document even if the URL parameter fails
+    formattedDeal.id = dealId;
+
     // If we have a numeric leadId, use it; otherwise try to extract from dealId or generate a new one
     if (!formattedDeal.leadId) {
       // Try to extract a numeric ID from dealId if it's a MongoDB ObjectId
@@ -140,25 +144,6 @@ export const updateDeal = async (dealId, dealData) => {
         const data = await response.json();
         console.log('API response for update:', data);
         return data;
-      }
-
-      // If the lead wasn't found by ID, try updating by leadId
-      if (response.status === 404 && formattedDeal.leadId) {
-        console.log('Lead not found by ID, trying to update by leadId');
-        const leadIdResponse = await fetch(`http://localhost:3000/api/leads/byLeadId/${formattedDeal.leadId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify(formattedDeal)
-        });
-
-        if (leadIdResponse.ok) {
-          const data = await leadIdResponse.json();
-          console.log('Successfully updated by leadId:', data);
-          return data;
-        }
       }
 
       // For other errors, throw to be caught by outer try/catch

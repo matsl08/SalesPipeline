@@ -36,7 +36,11 @@ const SignUp = () => {
         navigate('/login');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      if (err.response?.data?.message === 'User already exists') {
+        setError('Email already exists. Please use another email address instead.');
+      } else {
+        setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed.'); 
+      }
     } finally {
       setLoading(false);
     }

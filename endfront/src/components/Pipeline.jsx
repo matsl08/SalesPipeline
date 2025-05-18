@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Pipeline.css';
 import AddDealForm from '../modals/AddDeal/AddDeal';
 import EditDealForm from '../modals/EditDeal/EditDeal';
@@ -21,6 +22,7 @@ const Pipeline = () => {
   const [currentDeal, setCurrentDeal] = useState(null);
   const [currentCategory, setCurrentCategory] = useState('');
   const navigate = useNavigate();
+  const { logout: authLogout } = useAuth();
 
   // Fetch leads from API
   useEffect(() => {
@@ -90,8 +92,8 @@ const fetchLeads = async () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Use the logout function from AuthContext to properly clear all auth data
+    authLogout();
     setUsername(null);
     navigate('/login');
   };
@@ -130,9 +132,8 @@ const fetchLeads = async () => {
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    // Get the moved lead - handle both real IDs and temporary IDs
+    // Get the moved lead
     const lead = leads[source.droppableId].find((item, index) => {
-      // Check for both real ID and temporary ID with category
       return item._id === draggableId || `temp-id-${source.droppableId}-${index}` === draggableId;
     });
 
@@ -141,7 +142,7 @@ const fetchLeads = async () => {
     // Create a copy of the current state
     const newLeads = { ...leads };
 
-    // Remove from source - handle both real IDs and temporary IDs
+    // Remove from source
     newLeads[source.droppableId] = newLeads[source.droppableId].filter((item, index) => {
       return item._id !== draggableId && `temp-id-${source.droppableId}-${index}` !== draggableId;
     });
@@ -168,16 +169,21 @@ const fetchLeads = async () => {
     // Only update in database if we have a valid ID
     if (lead._id) {
       try {
+        setLoading(true);
         // Use the dealService to update the deal status
-        await updateDeal(lead._id, { status: newStatus });
+        await updateDeal(lead._id, { 
+          status: newStatus,
+          probability: updatedLead.probability
+        });
+        setLoading(false);
       } catch (error) {
         console.error('Error updating lead status:', error);
         setError('Failed to update lead status. The change may not be saved.');
+        setLoading(false);
+        // Optionally revert the UI state if the API call fails
+        // fetchLeads();
       }
     }
-
-    // Optionally revert the state if you want to be strict about consistency
-    // fetchLeads(); // Re-fetch all leads to ensure UI matches database
   };
 
   const refreshLeads = async () => {
@@ -244,36 +250,19 @@ const fetchLeads = async () => {
     <div className="lead-management">
       <header className="dashboard-header">
         <h1>Enhanced Sales Pipeline System</h1>
-        <div className="header-controls">
-          {username ? (
-            <div className="user-controls">
-              <span className="welcome-message">Welcome, {username}</span>
-              <button onClick={handleLogout} className="logout-btn">
-                Logout
-              </button>
-            </div>
-          ) : (
             <nav className="auth-nav">
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/pipeline" className="nav-link">Pipeline</Link>
-              <Link to="/interactions" className="nav-link">Interactions</Link>
-              <Link to="/login" className="nav-link">Login</Link>
-            </nav>
-          )}
-        </div>
+                   <Link to="/dashboard"><button className="nav-link">Dashboard</button></Link>
+                   <Link to="/pipeline"><button className="nav-link active">Pipeline</button></Link>
+                   <Link to="/interactions"><button className="nav-link">Interactions</button></Link>
+                   <button className="nav-link" onClick={handleLogout}>Log Out</button>
+                 </nav>
       </header>
 
       <div className="content-wrapper">
         <div className="section-header">
           <h2 className="section-title">Lead Pipeline</h2>
           <div className="header-actions">
-            <button
-              className="refresh-btn"
-              onClick={refreshLeads}
-              disabled={loading}
-            >
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </button>
+           
             <button
               className="add-deal-btn"
               onClick={() => setShowDealForm(true)}

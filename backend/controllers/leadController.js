@@ -82,17 +82,17 @@ export const getLeadById = async (req, res) => {
             .populate('assignedTo', 'name email');
 
         if (!lead) {
-            return res.status(404).json({ 
-                message: `Lead with ID ${id} not found` 
+            return res.status(404).json({
+                message: `Lead with ID ${id} not found`
             });
         }
 
         res.status(200).json(lead);
     } catch (error) {
         console.error('Error fetching lead:', error);
-        res.status(500).json({ 
-            message: 'Error fetching lead', 
-            error: error.message 
+        res.status(500).json({
+            message: 'Error fetching lead',
+            error: error.message
         });
     }
 };
@@ -101,21 +101,51 @@ export const getLeadById = async (req, res) => {
 // Update a lead with transaction
 export const updateLead = async (req, res) => {
     try {
+        // Get ID from either URL parameter or request body
+        const idFromParams = req.params.id;
         const { leadId } = req.body;
-        console.log('Updating lead:', leadId, req.body); // Debug log
+
+        console.log('Updating lead - ID from params:', idFromParams, 'ID from body:', leadId, 'Full body:', req.body); // Debug log
+
+        // Try to find by MongoDB _id first if the param looks like a MongoDB ObjectId
+        let query = {};
+        if (idFromParams && idFromParams.match(/^[0-9a-fA-F]{24}$/)) {
+            query = { _id: idFromParams };
+        } else if (leadId) {
+            // If no valid MongoDB ID but we have leadId in body, use that
+            query = { leadId: Number(leadId) };
+        } else if (idFromParams) {
+            // If param doesn't look like MongoDB ID but we have it, try as leadId
+            query = { leadId: Number(idFromParams) };
+        } else {
+            // If we have neither, check if there's an id field in the body (frontend might be using id instead of leadId)
+            if (req.body.id) {
+                if (req.body.id.match(/^[0-9a-fA-F]{24}$/)) {
+                    query = { _id: req.body.id };
+                } else {
+                    query = { leadId: Number(req.body.id) };
+                }
+            } else {
+                return res.status(400).json({
+                    message: 'No valid ID provided for update'
+                });
+            }
+        }
+
+        console.log('Using query for update:', query);
 
         const updatedLead = await Lead.findOneAndUpdate(
-            { leadId: Number(leadId) },
+            query,
             req.body,
-            { 
+            {
                 new: true,
-                runValidators: true 
+                runValidators: true
             }
         ).populate('interactions assignedTo');
 
         if (!updatedLead) {
-            return res.status(404).json({ 
-                message: `Lead with ID ${leadId} not found` 
+            return res.status(404).json({
+                message: `Lead not found with the provided ID`
             });
         }
 
@@ -126,9 +156,9 @@ export const updateLead = async (req, res) => {
             message: error.message,
             stack: error.stack
         });
-        res.status(500).json({ 
-            message: 'Error updating lead', 
-            error: error.message 
+        res.status(500).json({
+            message: 'Error updating lead',
+            error: error.message
         });
     }
 };
