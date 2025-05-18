@@ -29,6 +29,9 @@ const [isLoading, setIsLoading] = useState(true);
       try {
         setIsLoading(true);
         const response = await fetch('/api/analytics/dashboard');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         setAnalytics({
           totalSales: data.totalSales || 0,

@@ -29,7 +29,8 @@ export const registerUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email, password, profileImage } = req.body;
+    //"username" is changed to "name" in the request body
+    const { name, email, password, profileImage } = req.body;
 
     try {
         console.log('Checking if user exists...');
@@ -43,9 +44,9 @@ export const registerUser = async (req, res) => {
 
         console.log('Saving user to database...');
         const newUser = new User({
-            name: username,
+            name,
             email,
-            password: hashPassword,
+            password,
             profileImage: profileImage || null,
         });
 

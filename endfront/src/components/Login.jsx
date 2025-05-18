@@ -30,43 +30,35 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    //  try {
-    //    const response = await fetch('http://localhost:3000/api/login/:${formData.email}', {
-    //      method: 'POST',
-    //      headers: {
-    //        'Content-Type': 'application/json',
-    //      },
-    //      body: JSON.stringify({
-    //        email: formData.email.trim(),
-    //        password: formData.password
-    //      }),
-    //    });
-      
-    //    const data = await response.json();
-      
-    //    if (!response.ok) {
-    //      throw new Error(data.message || 'Login failed. Please check your credentials and try again.');
-    //    }
-      
-    //    if (data && data.token && data.user) {
-    //       // Store user info in localStorage
-    //      localStorage.setItem('token', data.token);
-    //      localStorage.setItem('user', JSON.stringify(data.user));
-        
-    //       // Update auth context
-    //      auth.login(data.user, data.token);
-        
-    //     //  Navigate to dashboard
-        navigate('/dashboard');
-    //    } else {
-    //      throw new Error('Invalid response format');
-    //    }
-    //  } catch (err) {
-    //    console.error('Login error:', err);
-    //    setError(err.message || 'Login failed. Please check your credentials and try again.');
-    //  } finally {
-    //    setLoading(false);
-    // }
+  try {
+    const response = await fetch('http://localhost:3000/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: formData.email.trim(),
+        password: formData.password
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Login failed. Please check your credentials and try again.');
+    }
+
+    // Store user info in localStorage
+    localStorage.setItem('user', JSON.stringify(data.user));
+    // Optionally update auth context if you use it
+    if (auth && auth.login) {
+      auth.login(data.user);
+    }
+
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err.message || 'Login failed. Please check your credentials and try again.');
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (

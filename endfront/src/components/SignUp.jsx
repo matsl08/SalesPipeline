@@ -5,7 +5,7 @@ import './SignUp.css';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    name: '', // changed from username to name
     email: '',
     password: '',
   });
@@ -27,7 +27,7 @@ const SignUp = () => {
 
     try {
       const response = await axios.post('http://localhost:3000/api/users/register', {
-        username: formData.username,
+        name: formData.name, // changed from username to name
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
@@ -36,7 +36,7 @@ const SignUp = () => {
         navigate('/login');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -62,13 +62,13 @@ const SignUp = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="name">Name</label>
             <input
-              id="username"
+              id="name"
               type="text"
               required
-              placeholder="Username"
-              value={formData.username}
+              placeholder="Your name"
+              value={formData.name}
               onChange={handleChange}
             />
           </div>
