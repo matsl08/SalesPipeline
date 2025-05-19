@@ -166,27 +166,53 @@ export const updateLead = async (req, res) => {
 // Delete a lead with transaction
 export const deleteLead = async (req, res) => {
     try {
-        const { leadId } = req.params;
+        const { id } = req.params;
+        console.log('Delete request received for id:', id);
 
-        // Parse leadId as a number
-        const numericLeadId = Number(leadId);
+        let deletedLead = null;
 
-        // Ensure leadId is a valid number
-        if (isNaN(numericLeadId)) {
-            return res.status(400).json({
-                message: 'Invalid leadId. It must be a number.'
-            });
+        // First try to find by MongoDB ObjectId
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+            console.log('Attempting to delete by MongoDB ObjectId');
+            try {
+                deletedLead = await Lead.findByIdAndDelete(id);
+                if (deletedLead) {
+                    console.log('Lead deleted successfully by ObjectId');
+                }
+            } catch (err) {
+                console.log('Error deleting by ObjectId:', err.message);
+            }
         }
 
-        // Find lead by leadId (numeric)
-        const deletedLead = await Lead.findOneAndDelete({ leadId: numericLeadId });
+        // If not found by ObjectId, try by numeric leadId
+        if (!deletedLead) {
+            const numericLeadId = Number(id);
+            if (!isNaN(numericLeadId)) {
+                console.log('Attempting to delete by numeric leadId:', numericLeadId);
+                deletedLead = await Lead.findOneAndDelete({ leadId: numericLeadId });
+                if (deletedLead) {
+                    console.log('Lead deleted successfully by numeric leadId');
+                }
+            }
+        }
+
+        // If still not found, try as a string leadId (for mock IDs)
+        if (!deletedLead && id.startsWith('mock-')) {
+            console.log('Attempting to delete by mock ID');
+            deletedLead = await Lead.findOneAndDelete({ _id: id });
+            if (deletedLead) {
+                console.log('Lead deleted successfully by mock ID');
+            }
+        }
 
         if (!deletedLead) {
+            console.log('Lead not found for deletion with id:', id);
             return res.status(404).json({
-                message: `Lead with ID ${numericLeadId} not found`
+                message: `Lead with ID ${id} not found`
             });
         }
 
+        console.log('Lead deleted successfully:', deletedLead);
         res.status(200).json({
             message: 'Lead deleted successfully',
             deletedLead

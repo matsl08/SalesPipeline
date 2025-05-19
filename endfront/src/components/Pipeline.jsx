@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import './Pipeline.css';
 import AddDealForm from '../modals/AddDeal/AddDeal';
 import EditDealForm from '../modals/EditDeal/EditDeal';
+import DealDetails from '../modals/DealDetails/DealDetails';
 import { deleteDeal, updateDeal } from '../services/dealService';
 
 const Pipeline = () => {
@@ -19,8 +20,16 @@ const Pipeline = () => {
   const [username, setUsername] = useState(localStorage.getItem('user'));
   const [showDealForm, setShowDealForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showDealDetails, setShowDealDetails] = useState(false);
   const [currentDeal, setCurrentDeal] = useState(null);
   const [currentCategory, setCurrentCategory] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredLeads, setFilteredLeads] = useState({
+    Cold: [],
+    Warm: [],
+    Hot: [],
+    Cooked: []
+  });
   const navigate = useNavigate();
   const { logout: authLogout } = useAuth();
 
@@ -58,6 +67,7 @@ const fetchLeads = async () => {
         ]
       };
       setLeads(mockData);
+      setFilteredLeads(mockData);
       setLoading(false);
       return;
     }
@@ -80,6 +90,7 @@ const fetchLeads = async () => {
     };
 
     setLeads(groupedLeads);
+    setFilteredLeads(groupedLeads);
   } catch (error) {
     console.error('Error fetching leads:', error);
     setError('Failed to load leads. Please try again later.');
@@ -91,23 +102,65 @@ const fetchLeads = async () => {
     fetchLeads();
   }, [navigate]);
 
+  // Filter leads when search term changes
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      // If search term is empty, show all leads
+      setFilteredLeads(leads);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+
+    // Filter leads by name or category
+    const filtered = {
+      Cold: leads.Cold.filter(lead =>
+        (lead.name && lead.name.toLowerCase().includes(term)) ||
+        'cold'.includes(term)
+      ),
+      Warm: leads.Warm.filter(lead =>
+        (lead.name && lead.name.toLowerCase().includes(term)) ||
+        'warm'.includes(term)
+      ),
+      Hot: leads.Hot.filter(lead =>
+        (lead.name && lead.name.toLowerCase().includes(term)) ||
+        'hot'.includes(term)
+      ),
+      Cooked: leads.Cooked.filter(lead =>
+        (lead.name && lead.name.toLowerCase().includes(term)) ||
+        'cooked'.includes(term)
+      )
+    };
+
+    setFilteredLeads(filtered);
+  }, [searchTerm, leads]);
+
   const handleLogout = () => {
     // Use the logout function from AuthContext to properly clear all auth data
     authLogout();
     setUsername(null);
-    navigate('/login');
+    navigate('/');
   };
 
   const handleRemoveDeal = async (dealId, category) => {
     try {
+      // Find the lead object in the leads state
+      const lead = leads[category].find((deal, index) => {
+        const itemId = deal._id || `temp-id-${category}-${index}`;
+        return itemId === dealId;
+      });
+
+      console.log('Removing deal:', dealId, 'from category:', category);
+      console.log('Lead object:', lead);
+
       // Check if this is a temporary ID (starts with 'temp-id-' or 'mock-')
       const isTemporaryId = typeof dealId === 'string' &&
         (dealId.startsWith('temp-id-') || dealId.startsWith('mock-'));
 
       // Only make API call if it's a real ID
-      if (!isTemporaryId) {
-        // Use the dealService to delete the deal
-        await deleteDeal(dealId);
+      if (!isTemporaryId && lead) {
+        // Use the dealService to delete the deal, passing both the ID and the lead object
+        await deleteDeal(dealId, lead);
       }
 
       // Remove the deal from the state
@@ -154,7 +207,7 @@ const fetchLeads = async () => {
     const updatedLead = {
       ...lead,
       status: newStatus,
-      probability: newStatus === 'cold' ? 25 : newStatus === 'warm' ? 50 : newStatus === 'hot' ? 75 : 100
+      probability: newStatus === 'cold' ? 25 : newStatus === 'warm' ? 50 : newStatus === 'hot' ? 75 : newStatus === 'cooked' ? 100 : 0
     };
 
     // Add to destination
@@ -171,7 +224,7 @@ const fetchLeads = async () => {
       try {
         setLoading(true);
         // Use the dealService to update the deal status
-        await updateDeal(lead._id, { 
+        await updateDeal(lead._id, {
           status: newStatus,
           probability: updatedLead.probability
         });
@@ -238,6 +291,7 @@ const fetchLeads = async () => {
       };
 
       setLeads(groupedLeads);
+      setFilteredLeads(groupedLeads);
     } catch (error) {
       console.error('Error refreshing leads:', error);
       setError('Failed to refresh leads. Please try again.');
@@ -249,7 +303,7 @@ const fetchLeads = async () => {
   return (
     <div className="lead-management">
       <header className="dashboard-header">
-        <h1>Enhanced Sales Pipeline System</h1>
+        <h1>Sales Pipeline System</h1>
             <nav className="auth-nav">
                    <Link to="/dashboard"><button className="nav-link">Dashboard</button></Link>
                    <Link to="/pipeline"><button className="nav-link active">Pipeline</button></Link>
@@ -260,9 +314,31 @@ const fetchLeads = async () => {
 
       <div className="content-wrapper">
         <div className="section-header">
-          <h2 className="section-title">Lead Pipeline</h2>
+          <h2 className="section-title">
+            Lead Pipeline
+            {searchTerm && (
+              <span className="search-indicator"> (Filtered)</span>
+            )}
+          </h2>
           <div className="header-actions">
-           
+            <div className="search-container">
+              <input
+                type="text"
+                className={`search-input ${searchTerm ? 'active-search' : ''}`}
+                placeholder="Search leads by name or category..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  className="clear-search-btn"
+                  onClick={() => setSearchTerm('')}
+                  title="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
             <button
               className="add-deal-btn"
               onClick={() => setShowDealForm(true)}
@@ -288,9 +364,13 @@ const fetchLeads = async () => {
               dealToEdit={currentDeal}
               category={currentCategory}
             />}
+            {showDealDetails && <DealDetails
+              deal={currentDeal}
+              onClose={() => setShowDealDetails(false)}
+            />}
             <DragDropContext onDragEnd={onDragEnd}>
               <div className="pipeline-container">
-                {Object.keys(leads).map((category) => (
+                {Object.keys(filteredLeads).map((category) => (
                   <Droppable key={category} droppableId={category}>
                     {(provided) => (
                       <div
@@ -300,12 +380,13 @@ const fetchLeads = async () => {
                       >
                         <h3 className="column-title">{category}</h3>
                         <div className="leads-container">
-                          {leads[category].length === 0 ? (
-                            <div className="empty-column">No leads in this stage</div>
+                          {filteredLeads[category].length === 0 ? (
+                            <div className="empty-column">
+                              {searchTerm ? 'No matching leads in this stage' : 'No leads in this stage'}
+                            </div>
                           ) : (
-                            leads[category].map((lead, index) => {
+                            filteredLeads[category].map((lead, index) => {
                               // Create a stable ID for each lead
-                              // Use _id if available, otherwise create a temporary ID based on category and index
                               const leadId = lead._id || `temp-id-${category}-${index}`;
 
                               // Store the index in the lead object for reference
@@ -319,6 +400,10 @@ const fetchLeads = async () => {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
+                                      onClick={() => {
+                                        setCurrentDeal(lead);
+                                        setShowDealDetails(true);
+                                      }}
                                     >
                                       <div className="lead-content">
                                         <div className="lead-header">
@@ -327,7 +412,7 @@ const fetchLeads = async () => {
                                         </div>
                                         <div className="lead-details">
                                           {lead.company && <p className="lead-company">{lead.company}</p>}
-                                          {lead.value > 0 && <p className="lead-value">${lead.value.toLocaleString()}</p>}
+                                          {lead.value > 0 && <p className="lead-value">₱{lead.value.toLocaleString()}</p>}
                                           {lead.email && <p className="lead-email">{lead.email}</p>}
                                         </div>
                                         <div className="deal-buttons">
@@ -352,6 +437,16 @@ const fetchLeads = async () => {
                                             }}
                                           >
                                             Remove
+                                          </button>
+                                          <button
+                                            className="view-details-btn"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setCurrentDeal(lead);
+                                              setShowDealDetails(true);
+                                            }}
+                                          >
+                                            Details
                                           </button>
                                         </div>
                                       </div>

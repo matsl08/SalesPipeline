@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import './Interactions.css';
 import AddInteractionForm from '../modals/AddInteraction/AddInteraction';
 import EditInteractionForm from '../modals/EditInteraction/EditInteraction';
+import InteractionDetails from '../modals/InteractionDetails/InteractionDetails';
 import { fetchInteractions, fetchInteractionsByLead, deleteInteraction } from '../services/interactionService';
 
 
@@ -11,6 +12,7 @@ const InteractionHistory = ({ leadName }) => {
   const [username, setUsername] = useState(localStorage.getItem('user'));
   const [showInteractionForm, setShowInteractionForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentInteraction, setCurrentInteraction] = useState(null);
   const [currentInteractionIndex, setCurrentInteractionIndex] = useState(-1);
   const [interactions, setInteractions] = useState([]);
@@ -37,12 +39,15 @@ const InteractionHistory = ({ leadName }) => {
           interactionsData = await fetchInteractions();
         }
 
-        // Format the interactions for display
+        // Format the interactions for display but keep all original data
         const formattedInteractions = interactionsData.map(interaction => ({
+          ...interaction, // Keep all original data
           _id: interaction._id,
           date: interaction.date || new Date(interaction.createdAt).toISOString().split('T')[0],
           type: interaction.type.charAt(0).toUpperCase() + interaction.type.slice(1),
-          notes: interaction.notes || interaction.summary
+          notes: interaction.notes || interaction.summary,
+          // Ensure lead information is preserved
+          lead: interaction.lead
         }));
 
         setInteractions(formattedInteractions);
@@ -108,13 +113,13 @@ const InteractionHistory = ({ leadName }) => {
     // Use the logout function from AuthContext to properly clear all auth data
     authLogout();
     setUsername(null);
-    navigate('/login');
+    navigate('/');
   };
 
   return (
     <div className="lead-management">
       <header className="dashboard-header">
-        <h1>Enhanced Sales Pipeline System</h1>
+        <h1>Sales Pipeline System</h1>
         <div className="header-controls">
           <nav className="auth-nav">
             <Link to="/dashboard"><button className="nav-link">Dashboard</button></Link>
@@ -156,20 +161,34 @@ const InteractionHistory = ({ leadName }) => {
             interactionIndex={currentInteractionIndex}
           />
         }
+        {showDetailsModal && currentInteraction &&
+          <InteractionDetails
+            interactionId={currentInteraction._id}
+            interaction={currentInteraction}
+            onClose={() => setShowDetailsModal(false)}
+          />
+        }
           <div className="interaction-list">
             <ul>
               {interactions.map((interaction, index) => (
                 <li key={index} className="interaction-item">
-                  <div className="interaction-content">
+                  <div
+                    className="interaction-content"
+                    onClick={() => {
+                      setCurrentInteraction(interaction);
+                      setShowDetailsModal(true);
+                    }}
+                  >
                     <div className="interaction-details">
                       <div className="interaction-date">{interaction.date}</div>
                       <div className="interaction-type">{interaction.type}</div>
                       <div className="interaction-notes">{interaction.notes}</div>
                     </div>
-                    <div className="interaction-buttons">
+                    <div className="interaction-buttons" onClick={(e) => e.stopPropagation()}>
                       <button
                         className="edit-interaction-btn"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setCurrentInteraction(interaction);
                           setCurrentInteractionIndex(index);
                           setShowEditForm(true);
@@ -179,14 +198,16 @@ const InteractionHistory = ({ leadName }) => {
                       </button>
                       <button
                         className="remove-interaction-btn"
-                        onClick={() => handleRemoveInteraction(interaction, index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveInteraction(interaction, index);
+                        }}
                       >
                         Remove
                       </button>
                     </div>
                   </div>
                 </li>
-
               ))}
             </ul>
           </div>

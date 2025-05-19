@@ -193,6 +193,10 @@ header {
   transform: translateX(5px);
 }
 
+.interaction-content {
+  cursor: pointer;
+}
+
 .interaction-item:last-child {
   border-bottom: none;
 }

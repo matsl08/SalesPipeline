@@ -174,24 +174,55 @@ export const updateDeal = async (dealId, dealData) => {
 /**
  * Delete a deal
  * @param {string} dealId - The ID of the deal to delete
+ * @param {Object} lead - The lead object containing additional data
  * @returns {Promise<boolean>} - Success status
  */
-export const deleteDeal = async (dealId) => {
+export const deleteDeal = async (dealId, lead = null) => {
   try {
+    console.log('Deleting deal with ID:', dealId);
+
+    // If we have the lead object, try to use its leadId property
+    let endpoint = `http://localhost:3000/api/leads/${dealId}`;
+
+    // If the lead has a numeric leadId property, use that instead
+    if (lead && lead.leadId && typeof lead.leadId === 'number') {
+      endpoint = `http://localhost:3000/api/leads/${lead.leadId}`;
+      console.log('Using numeric leadId for deletion:', lead.leadId);
+    }
+
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:3000/api/leads/${dealId}`, {
+    const response = await fetch(endpoint, {
       method: 'DELETE',
-      headers: token ? {
-        'Authorization': `Bearer ${token}`
-      } : {}
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
     });
 
-    // Handle 404 or other API errors
-    if (response.status === 404 || !response.ok) {
-      console.log('API error or endpoint not found, proceeding with UI update');
+    if (response.ok) {
+      console.log('Deal deleted successfully via API');
       return true;
     }
 
+    // If the first attempt fails, try with _id as a fallback
+    if (response.status === 404 && lead && lead._id) {
+      console.log('First delete attempt failed, trying with _id:', lead._id);
+
+      const fallbackResponse = await fetch(`http://localhost:3000/api/leads/${lead._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+
+      if (fallbackResponse.ok) {
+        console.log('Deal deleted successfully via fallback API call');
+        return true;
+      }
+    }
+
+    console.log('API error or endpoint not found, proceeding with UI update only');
     return true;
   } catch (error) {
     console.error('Error in dealService.deleteDeal:', error);

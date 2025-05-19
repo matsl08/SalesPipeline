@@ -10,6 +10,6 @@ router.get('/', getLeads);
 router.get('/:id', getLeadById);  // Changed from /leads/:leadId to /:id
 router.put('/:id', updateLead);
 router.patch('/:id', updateLead);
-router.delete('/:leadId', deleteLead);
+router.delete('/:id', deleteLead);  // Changed from /:leadId to /:id for consistency
 
 export default router;

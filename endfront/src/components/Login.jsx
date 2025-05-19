@@ -66,7 +66,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <header className="dashboard-header">
-        <h1>Enhanced Sales Pipeline System</h1>
+        <h1>Sales Pipeline System</h1>
         <nav className="auth-nav">
           <Link to="/signup" className="nav-link">Sign Up</Link>
         </nav>
@@ -109,7 +109,7 @@ const Login = () => {
           </div>
             <div className="login-help">
           <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
-          <p>Test account: test@example.com / password123</p>
+
         </div>
           <button
             type="submit"

@@ -153,7 +153,7 @@ const EditDealForm = ({ onClose, setLeads, dealToEdit, category }) => {
               <option value="cooked">Cooked</option>
             </select>
           </div>
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Category</label>
             <select
               value={editedDeal.category}
@@ -164,7 +164,7 @@ const EditDealForm = ({ onClose, setLeads, dealToEdit, category }) => {
               <option value="partner">Partner</option>
               <option value="other">Other</option>
             </select>
-          </div>
+          </div> */}
           <div className="form-group">
             <label>Phone</label>
             <input

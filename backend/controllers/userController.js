@@ -59,7 +59,7 @@ export const registerUser = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', error: 'An error occurred during registration' });
     }
 };
-// Add this helper function before the loginUser function
+// helper function 
 const generateToken = (user) => {
   return jwt.sign(
     { 

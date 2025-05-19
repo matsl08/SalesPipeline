@@ -23,7 +23,7 @@ export const createInteraction = async (req, res) => {
             followUpDate,
             nextSteps,
             notes,
-            createdBy: req.user?._id || null // Make createdBy optional for now
+            createdBy: req.user?._id || null 
         });
 
         const savedInteraction = await interaction.save();

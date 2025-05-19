@@ -191,7 +191,7 @@ const AddDealForm = ({ onClose, setLeads }) => {
             />
           </div>
 
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Category</label>
             <select
               value={newDeal.category}
@@ -202,7 +202,7 @@ const AddDealForm = ({ onClose, setLeads }) => {
               <option value="partner">Partner</option>
               <option value="other">Other</option>
             </select>
-          </div>
+          </div> */}
 
           <div className="form-group full-width">
             <label>Notes</label>
