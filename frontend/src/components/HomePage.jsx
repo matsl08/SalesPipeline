@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import { initNavbarScrollEffect, initCardHoverEffects } from '../utils/animations';
+import logo from '../assets/1.jpg';
 
 const HomePage = () => {
   useEffect(() => {
@@ -23,7 +24,7 @@ const HomePage = () => {
       <nav className="nav-bar">
         <div className="logo-container">
           <img
-            src="/1.jpg"
+            src={logo}
             alt="Sales Pipeline Logo"
             className="logo"
           />
