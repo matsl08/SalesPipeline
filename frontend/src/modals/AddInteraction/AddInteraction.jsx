@@ -27,7 +27,7 @@ const AddInteractionForm = ({ onClose, setInteractions, leads = [] }) => {
     const fetchLeads = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/leads', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
           headers: token ? {
             'Authorization': `Bearer ${token}`
           } : {}
@@ -79,7 +79,7 @@ const AddInteractionForm = ({ onClose, setInteractions, leads = [] }) => {
 
       if (token) {
         try {
-          const response = await fetch('http://localhost:3000/api/interactions', {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interactions`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

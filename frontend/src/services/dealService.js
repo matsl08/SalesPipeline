@@ -25,7 +25,7 @@ export const addDeal = async (dealData) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/leads', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export const updateDeal = async (dealId, dealData) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/leads/${dealId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads/${dealId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +208,7 @@ export const deleteDeal = async (dealId, lead = null) => {
     if (response.status === 404 && lead && lead._id) {
       console.log('First delete attempt failed, trying with _id:', lead._id);
 
-      const fallbackResponse = await fetch(`http://localhost:3000/api/leads/${lead._id}`, {
+      const fallbackResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads/${lead._id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

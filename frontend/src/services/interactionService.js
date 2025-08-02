@@ -9,7 +9,7 @@
 export const fetchInteractions = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3000/api/interactions', {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interactions`, {
       headers: token ? {
         'Authorization': `Bearer ${token}`
       } : {}
@@ -36,7 +36,7 @@ export const fetchInteractions = async () => {
 export const fetchInteractionsByLead = async (leadId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:3000/api/interactions/lead/${leadId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interactions/lead/${leadId}`, {
       headers: token ? {
         'Authorization': `Bearer ${token}`
       } : {}
@@ -63,7 +63,7 @@ export const fetchInteractionsByLead = async (leadId) => {
 export const deleteInteraction = async (interactionId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:3000/api/interactions/${interactionId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interactions/${interactionId}`, {
       method: 'DELETE',
       headers: token ? {
         'Authorization': `Bearer ${token}`
@@ -92,7 +92,7 @@ export const deleteInteraction = async (interactionId) => {
 export const fetchInteractionById = async (interactionId) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:3000/api/interactions/${interactionId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interactions/${interactionId}`, {
       headers: token ? {
         'Authorization': `Bearer ${token}`
       } : {}
@@ -105,7 +105,7 @@ export const fetchInteractionById = async (interactionId) => {
       if (!data.lead || typeof data.lead !== 'object') {
         // Try to find the lead information from the leads API
         try {
-          const leadsResponse = await fetch('http://localhost:3000/api/leads', {
+          const leadsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
             headers: token ? {
               'Authorization': `Bearer ${token}`
             } : {}

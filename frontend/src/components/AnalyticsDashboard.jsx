@@ -14,7 +14,7 @@ const AnalyticsDashboard = () => {
 
         // Add a timestamp to prevent caching
         const timestamp = new Date().getTime();
-        const response = await fetch(`/api/analytics/dashboard?t=${timestamp}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analytics/dashboard?t=${timestamp}`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'

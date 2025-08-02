@@ -29,7 +29,7 @@ const Dashboard = () => {
         let activeLeadsCount = 0;
         try {
           const token = localStorage.getItem('token');
-          const leadsResponse = await fetch('http://localhost:3000/api/leads', {
+          const leadsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
             headers: token ? {
               'Authorization': `Bearer ${token}`
             } : {}
@@ -60,7 +60,7 @@ const Dashboard = () => {
         try {
           // Add a timestamp to prevent caching
           const timestamp = new Date().getTime();
-          const response = await fetch(`/api/analytics/dashboard?t=${timestamp}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/analytics/dashboard?t=${timestamp}`, {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'

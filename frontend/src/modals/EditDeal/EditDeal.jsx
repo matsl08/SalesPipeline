@@ -36,6 +36,45 @@ const EditDealForm = ({ onClose, setLeads, dealToEdit, category }) => {
     }
   }, [dealToEdit, category]);
 
+    // // Fetch deals for the dropdown
+    // useEffect(() => {
+    //   const fetchLeads = async () => {
+    //     try {
+    //       const token = localStorage.getItem('token');
+    //       const response = await fetch('https://salespipeline-backend.onrender.com/api/leads', {
+    //         headers: token ? {
+    //           'Authorization': `Bearer ${token}`
+    //         } : {}
+    //       });
+  
+    //       if (response.ok) {
+    //         const data = await response.json();
+    //         const leadsArray = Array.isArray(data) ? data : (data.leads || []);
+    //         setLocalLeads(leadsArray);
+    //       } else {
+    //         // Use mock data if API is unavailable
+    //         setLocalLeads([
+    //           { _id: 'mock-1', name: 'John Smith', company: 'Acme Inc.' },
+    //           { _id: 'mock-2', name: 'Sarah Johnson', company: 'Tech Solutions' },
+    //           { _id: 'mock-3', name: 'Michael Brown', company: 'Global Services' },
+    //           { _id: 'mock-4', name: 'Emily Davis', company: 'Innovative Systems' }
+    //         ]);
+    //       }
+    //     } catch (error) {
+    //       console.error('Error fetching leads:', error);
+    //       // Use mock data if API call fails
+    //       setLocalLeads([
+    //         { _id: 'mock-1', name: 'John Smith', company: 'Acme Inc.' },
+    //         { _id: 'mock-2', name: 'Sarah Johnson', company: 'Tech Solutions' },
+    //         { _id: 'mock-3', name: 'Michael Brown', company: 'Global Services' },
+    //         { _id: 'mock-4', name: 'Emily Davis', company: 'Innovative Systems' }
+    //       ]);
+    //     }
+    //   };
+  
+    //   fetchLeads();
+    // }, []);
+
   const handleEditDeal = async (e) => {
     e.preventDefault();
     setLoading(true);

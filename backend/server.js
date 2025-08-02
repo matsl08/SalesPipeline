@@ -17,6 +17,15 @@ connectDatabase();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://sales-pipeline-amber.vercel.app'
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
 
 
 // const MONGODB_URL = process.env.MONGODB_URI || 'mongodb://localhost:27017/salesPipeline';
@@ -60,6 +69,12 @@ app.use((err, req, res, next) => {
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
+
+// Initial API route
+app.get('/', (req, res) => {
+    res.send('Sales Pipeline API is running');
+});
+
 
 // Handle 404 routes
 app.use((req, res) => {

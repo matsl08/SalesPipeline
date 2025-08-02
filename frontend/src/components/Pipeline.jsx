@@ -42,7 +42,7 @@ const fetchLeads = async () => {
     const token = localStorage.getItem('token');
 
     // Make the API request without requiring authentication
-    const response = await fetch('http://localhost:3000/api/leads', {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
       headers: token ? {
         'Authorization': `Bearer ${token}`
       } : {}
@@ -244,7 +244,7 @@ const fetchLeads = async () => {
       setLoading(true);
       setError('');
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/leads', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leads`, {
         headers: token ? {
           'Authorization': `Bearer ${token}`
         } : {}
