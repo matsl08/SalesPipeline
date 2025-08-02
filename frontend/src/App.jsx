@@ -9,6 +9,9 @@ import Pipeline from './components/Pipeline';
 import InteractionHistory from './components/InteractionHistory';
 import ViewAnalytics from './components/ViewAnalytics';
 import './App.css';
+import salesPipelineLogo from './assets/1.jpg';
+
+<img src={salesPipelineLogo} alt="salesPipelineLogo" />
 
 const App = () => {
   const { isAuthenticated, loading } = useAuth();
